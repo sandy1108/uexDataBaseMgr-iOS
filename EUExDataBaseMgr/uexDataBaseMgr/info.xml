@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<uexplugins>
+    <plugin
+        uexName="uexDataBaseMgr" version="3.0.3" build="3">
+        <info>3:重新解决uexDataBaseMgr插件IDE包创建表格失败的问题</info>
+        <build>2:解决uexDataBaseMgr插件IDE包创建表格失败的问题</build>
+        <build>1:使用新版Xcode重新编译,支持arm64</build>
+        <build>0:数据库功能插件</build>
+    </plugin>
+</uexplugins>
