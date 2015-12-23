@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:uexDataBaseMgr.xcodeproj">
+      location = "self:EUExDataBaseMgr.xcodeproj">
    </FileRef>
 </Workspace>

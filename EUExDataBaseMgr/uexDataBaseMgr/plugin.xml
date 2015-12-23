@@ -2,11 +2,11 @@
 <uexplugins>
     <plugin name="uexDataBaseMgr">
         <method name="openDataBase"></method>
-				<method name="executeSql"></method>
+		<method name="executeSql"></method>
         <method name="selectSql"></method>
         <method name="transaction"></method>
-				<method name="closeDataBase"></method>        
-				<method name="beginTransaction"></method>
+		<method name="closeDataBase"></method>        
+		<method name="beginTransaction"></method>
         <method name="endTransaction"></method>
 	  </plugin>
 </uexplugins>
