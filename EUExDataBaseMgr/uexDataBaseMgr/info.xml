@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
     <plugin
-        uexName="uexDataBaseMgr" version="3.0.4" build="4">
-        <info>4:添加IDE支持</info>
+        uexName="uexDataBaseMgr" version="3.0.5" build="5">
+        <info>5:修复数据包含特殊字符时回调结果错误的问题</info>
+        <build>4:添加IDE支持</build>
         <build>3:重新解决uexDataBaseMgr插件IDE包创建表格失败的问题</build>
         <build>2:解决uexDataBaseMgr插件IDE包创建表格失败的问题</build>
         <build>1:使用新版Xcode重新编译,支持arm64</build>

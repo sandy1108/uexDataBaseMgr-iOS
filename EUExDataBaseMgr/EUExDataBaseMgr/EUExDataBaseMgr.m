@@ -11,6 +11,7 @@
 #import "Database.h"
 #import "EUExBaseDefine.h"
 #import "BUtility.h"
+#import "JSON.h"
 @implementation EUExDataBaseMgr
 -(void)dealloc{
 	if (DBDict) {
@@ -49,7 +50,7 @@
 	}
 	Database *db = [DBDict objectForKey:inDBName];
 	if (db) {
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
 		return;
 		//db = [[Database alloc] init];
 		//[DBDict setObject:db forKey:inOpId];
@@ -59,9 +60,9 @@
     openStatus = [db openDataBase:inDBName];
 	if (openStatus) {
         [DBDict setObject:db forKey:inDBName];
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
 	}else {
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 	}
 }
 -(void)executeSql:(NSMutableArray *)arguments{
@@ -70,22 +71,22 @@
 	NSString *inSQL = [arguments objectAtIndex:2];
 	Database *db = [DBDict objectForKey:inDBName];
 	if(!db){
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 		return;
 	}
 	BOOL execStatus = NO;
 	const char *execSql;
 	if (inSQL==NULL||[inSQL length]==0) {
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 		return;
 	}
 	execSql = [inSQL UTF8String];
 	execStatus = [db execSQL:execSql];
 	if (execStatus) {
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
 	}else {
 		rollTarget = YES;
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 	}
 }
 -(void)selectSql:(NSMutableArray *)arguments{
@@ -94,20 +95,23 @@
 	NSString *inSQL = [arguments objectAtIndex:2];
 	Database *db = [DBDict objectForKey:inDBName];
 	if(!db){
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 		return;
 	}
 	const char *selectSql;
 	if (inSQL==NULL||[inSQL length]==0) {
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 		return;
 	}
 	selectSql = [inSQL UTF8String];
 	NSString *cbResult = [db selectSQL:selectSql];
 	if (cbResult) {
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_JSON strData:cbResult];
+        NSString *jsStr = [NSString stringWithFormat:@"if(uexDataBaseMgr.cbSelectSql){uexDataBaseMgr.cbSelectSql(%@,%@,%@)}",inOpId,@(UEX_CALLBACK_DATATYPE_JSON),[cbResult JSONFragment]];
+        
+        [EUtility brwView:self.meBrwView evaluateScript:jsStr];
+		//[self jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_JSON strData:cbResult];
 	}else {
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 	}
 
 }
@@ -116,7 +120,7 @@
 	NSString *inOpId = [inArguments objectAtIndex:1];
 	Database *db = [DBDict objectForKey:inDBName];
 	if(!db){
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 		return;
 	}
 	rollTarget = NO;
@@ -124,9 +128,9 @@
 	const char *tranSql = "BEGIN TRANSACTION";
 	tranStatus = [db execSQL:tranSql];
 	//if (tranStatus) {
-	//	[super jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
+	//	[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
 	//}else {
-	//	[super jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+	//	[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 	//}
 }
 -(void)endTransaction:(NSMutableArray *)arguments{
@@ -134,7 +138,7 @@
 	NSString *inOpId = [arguments objectAtIndex:1];
 	Database *db = [DBDict objectForKey:inDBName];
 	if(!db){
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 		return;
 	}
 	BOOL tranStatus = NO;
@@ -146,12 +150,12 @@
 	}
 	tranStatus = [db execSQL:tranSql];
 	if (rollTarget) {
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 	}else {
 		if (tranStatus) {
-			[super jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
+			[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
 		}else {
-			[super jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+			[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 		}
 	}
 }
@@ -163,16 +167,16 @@
 	}
 	Database *db = [DBDict objectForKey:inDBName];
 	if(!db){
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbCloseDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbCloseDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 		return;
 	}
 	BOOL closeStatus = NO;
 	closeStatus = [db closeDataBase];
 	if (closeStatus) {
 		[DBDict removeObjectForKey:inDBName];
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbCloseDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbCloseDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
 	}else {
-		[super jsSuccessWithName:@"uexDataBaseMgr.cbCloseDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+		[self jsSuccessWithName:@"uexDataBaseMgr.cbCloseDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 	}
 }
 
