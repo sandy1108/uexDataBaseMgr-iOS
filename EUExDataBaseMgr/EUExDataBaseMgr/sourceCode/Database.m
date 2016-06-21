@@ -7,31 +7,26 @@
 //
 
 #import "Database.h"
-#import "EUtility.h"
-#import "JSON.h"
+
 @implementation Database
 -(BOOL)openDataBase:(NSString*)inDBName{
     //获取documents路径
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString * appCanDocumentPath =[[NSString alloc] initWithString:[paths objectAtIndex:0]] ;
-    NSString *docPath = [appCanDocumentPath stringByAppendingPathComponent:inDBName];
-	NSString *dbFolderPath = [EUtility documentPath:@"database"];
+
+    NSString * documentPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject ;
+
+	NSString *dbFolderPath = [documentPath stringByAppendingPathComponent:@"database"];
 	NSFileManager *fileHandle = [NSFileManager defaultManager];
-	BOOL isExist = [fileHandle fileExistsAtPath:docPath];
-	if (isExist) {
-		NSDictionary *dict = [fileHandle attributesOfItemAtPath:dbFolderPath error:nil];
-		NSString *fileType = [dict objectForKey:NSFileType];
-		if (![fileType isEqual:NSFileTypeDirectory]) {
-			[[NSFileManager defaultManager] createDirectoryAtPath:dbFolderPath withIntermediateDirectories:YES attributes:nil error:nil];
-		}
-	}else {
+    BOOL isFolder = NO;
+	BOOL isExist = [fileHandle fileExistsAtPath:dbFolderPath isDirectory:&isFolder];
+	if (!isExist || !isFolder) {
 		[[NSFileManager defaultManager] createDirectoryAtPath:dbFolderPath withIntermediateDirectories:YES attributes:nil error:nil];
-	}
-	NSString *dbPath = [NSString stringWithFormat:@"%@/%@",dbFolderPath,inDBName];
-	NSLog(@"openDataBase dbPath=%@",dbPath);
-	int openDataStatus = sqlite3_open([dbPath UTF8String], &dbHandle);
-	//NSLog(@"openDataBase openDataStatus =%d",openDataStatus);
-	if (openDataStatus==SQLITE_OK) {
+    }
+	
+	NSString *dbPath = [dbFolderPath stringByAppendingPathComponent:inDBName];
+	if (sqlite3_open([dbPath UTF8String], &dbHandle) == SQLITE_OK) {
+        NSString *label = [@"com.appcan.uexDataBaseMgr.dbQueue." stringByAppendingString:inDBName];
+        self.queue = dispatch_queue_create([label UTF8String], DISPATCH_QUEUE_SERIAL);
+        self.transactionLock = dispatch_semaphore_create(1);
 		return YES;
 	}else {
 		sqlite3_close(dbHandle);
@@ -39,47 +34,49 @@
 	return NO;
 }
 
--(BOOL)closeDataBase{
+- (BOOL)closeDataBase{
 	if (sqlite3_close(dbHandle)==SQLITE_OK) {
 		return YES;
 	}
 	return NO;
 }
 
--(BOOL)execSQL:(const char*)inSQL{
-	char *errMsg = NULL;
+- (BOOL)execSQL:(const char*)inSQL{
+    ACLogDebug(@"exec SQL: %s",inSQL);
+	char *errMsg = nil;
+
 	int execStatus = sqlite3_exec(dbHandle, inSQL, NULL, NULL, &errMsg);
 	if (execStatus == SQLITE_OK) {
 		return YES;
 	}else{
-		PluginLog(@"database execSQL execStatus = %d,errMsg=%s",execStatus,errMsg);
+		ACLogInfo(@"database execSQL ERROR!status = %d,errMsg=%s",execStatus,errMsg);
 		sqlite3_free(errMsg);
+        return NO;
 	}
-	return NO;
+	
 }
--(NSString*)selectSQL:(const char*)inSQL{
-	char *errMsg = NULL;
+- (NSArray *)selectSQL:(const char*)inSQL{
+    ACLogDebug(@"select SQL: %s",inSQL);
+	const char *errMsg = nil;
 	sqlite3_stmt *stmt;
-	NSMutableDictionary *entry;
 	int stepStatus,i,count,column_type;
 	NSObject *columnValue;
     NSString *columnName;
-	NSString *resultSet;
-	NSMutableArray *resultRows = [NSMutableArray arrayWithCapacity:0];
-	BOOL keepGoing = NO;
-	int preStatus = sqlite3_prepare_v2(dbHandle, inSQL, -1, &stmt, NULL);
-	if (preStatus != SQLITE_OK) {
-		errMsg = (char *) sqlite3_errmsg (dbHandle);
-		PluginLog(@" selectSQL errMsg=%s",errMsg);
-		keepGoing = NO;
+	NSMutableArray *resultRows = [NSMutableArray array];
+    BOOL isSuccess = YES;
+	if (sqlite3_prepare_v2(dbHandle, inSQL, -1, &stmt, NULL) != SQLITE_OK) {
+        isSuccess = NO;
+		errMsg = sqlite3_errmsg (dbHandle);
+		ACLogInfo(@"selectSQL errMsg=%s",errMsg);
+
 	}
-	keepGoing = YES;
+    BOOL keepGoing = isSuccess;
 	while (keepGoing) {
 		stepStatus = sqlite3_step(stmt);
 		switch (stepStatus) {
 				case SQLITE_ROW:{
 					i = 0;
-					entry = [NSMutableDictionary dictionaryWithCapacity:0];
+					NSMutableDictionary *entry = [NSMutableDictionary dictionaryWithCapacity:0];
 					count = sqlite3_column_count(stmt);
 					while (i<count) {
 						column_type = sqlite3_column_type(stmt, i);
@@ -109,29 +106,26 @@
 						i++;
 					}
 					[resultRows addObject:entry];
-				break;
+                    break;
 				}
 				case SQLITE_DONE:{
 					keepGoing = NO;
-				break;
+                    break;
 				}
 				default:{
 					errMsg ="stmt error";
+                    ACLogInfo(@"selectSQL errMsg=%s",errMsg);
+                    isSuccess = NO;
 					keepGoing = NO;
-				break;
+                    break;
 				}
 		}
 	}
 	sqlite3_finalize(stmt);
-	if (errMsg!=NULL) {
-		PluginLog(@"selectSQL errMsg=%s",errMsg);
-	}else {
-		resultSet = [resultRows JSONFragment];
-		return resultSet;
+	if (!isSuccess) {
+        return nil;
 	}
-	return NULL;	
+    return resultRows;
 }
--(void)dealloc{
-	[super dealloc];
-}
+
 @end

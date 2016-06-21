@@ -7,177 +7,206 @@
 //
 
 #import "EUExDataBaseMgr.h"
-#import "EUtility.h"
+
 #import "Database.h"
-#import "EUExBaseDefine.h"
-#import "BUtility.h"
-#import "JSON.h"
+#import <AppCanKit/ACEXTScope.h>
+
+
+        
+
+
+@interface EUExDataBaseMgr()
+@property (nonatomic,strong)NSMutableDictionary<NSString *,Database *> *dbDict;
+@property (nonatomic,assign)BOOL shouldRollback;
+
+
+@end
+
+
+#define UEX_SUCCESS @0
+#define UEX_FAILURE @1
+
 @implementation EUExDataBaseMgr
 -(void)dealloc{
-	if (DBDict) {
-		for (Database *db in [DBDict allValues]) {
-			[db closeDataBase];
-			[db release];
-			db = nil;
-		}
-		[DBDict removeAllObjects];
-	}
-	[super dealloc];
+    [self clean];
 }
 -(void)clean{
-	if (DBDict) {
-		for (Database *db in [DBDict allValues]) {
-			[db closeDataBase];
-			[db release];
-			db = nil;
-		}
-		[DBDict removeAllObjects];
-	}
+    for (Database *db in [self.self.dbDict allValues]) {
+        [db closeDataBase];
+    }
+    [self.dbDict removeAllObjects];
+	
 }
 
--(id)initWithBrwView:(EBrowserView *)eInBrwView{
-	if (self==[super initWithBrwView:eInBrwView]) {
-		DBDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-	}
-	return self;
+
+- (instancetype)initWithWebViewEngine:(id<AppCanWebViewEngineObject>)engine{
+
+    self = [super initWithWebViewEngine:engine];
+    if (self) {
+        _dbDict = [NSMutableDictionary dictionary];
+    }
+    return self;
 }
--(void)openDataBase:(NSMutableArray*)arguments{
-    [BUtility setAppCanDocument];
-	NSString *inDBName = [arguments objectAtIndex:0];
-	NSString *inOpId = 0;
-	if([arguments count]==2){
-		inOpId = [arguments objectAtIndex:1];
-	}
-	Database *db = [DBDict objectForKey:inDBName];
+
+
+
+
+- (NSNumber *)openDataBase:(NSMutableArray *)inArguments{
+    ACArgsUnpack(NSString *inDBName,NSNumber *inOpId) = inArguments;
+    __block NSNumber *cbResult = UEX_FAILURE;
+    @onExit{
+        [self.webViewEngine callbackWithFunctionKeyPath:@"uexDataBaseMgr.cbOpenDataBase" arguments:ACArgsPack(@(inOpId.integerValue),@2,cbResult)];
+    };
+    
+    if (!inDBName || inDBName.length == 0) {
+        return cbResult;
+    }
+
+	Database *db = [self.dbDict objectForKey:inDBName];
 	if (db) {
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
-		return;
-		//db = [[Database alloc] init];
-		//[DBDict setObject:db forKey:inOpId];
+        cbResult = UEX_SUCCESS;
+		return @-1;
 	}
+    
 	db = [[Database alloc] init];
-	BOOL openStatus = NO;
-    openStatus = [db openDataBase:inDBName];
-	if (openStatus) {
-        [DBDict setObject:db forKey:inDBName];
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
-	}else {
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+	if ([db openDataBase:inDBName]) {
+        [self.dbDict setObject:db forKey:inDBName];
+        cbResult = UEX_SUCCESS;
 	}
+    return cbResult;
 }
--(void)executeSql:(NSMutableArray *)arguments{
-	NSString *inDBName = [arguments objectAtIndex:0];
-	NSString *inOpId = [arguments objectAtIndex:1];
-	NSString *inSQL = [arguments objectAtIndex:2];
-	Database *db = [DBDict objectForKey:inDBName];
-	if(!db){
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-		return;
-	}
-	BOOL execStatus = NO;
-	const char *execSql;
-	if (inSQL==NULL||[inSQL length]==0) {
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-		return;
-	}
-	execSql = [inSQL UTF8String];
-	execStatus = [db execSQL:execSql];
-	if (execStatus) {
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
-	}else {
-		rollTarget = YES;
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-	}
-}
--(void)selectSql:(NSMutableArray *)arguments{
-	NSString *inDBName = [arguments objectAtIndex:0];
-	NSString *inOpId = [arguments objectAtIndex:1];
-	NSString *inSQL = [arguments objectAtIndex:2];
-	Database *db = [DBDict objectForKey:inDBName];
-	if(!db){
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-		return;
-	}
-	const char *selectSql;
-	if (inSQL==NULL||[inSQL length]==0) {
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-		return;
-	}
-	selectSql = [inSQL UTF8String];
-	NSString *cbResult = [db selectSQL:selectSql];
-	if (cbResult) {
-        NSString *jsStr = [NSString stringWithFormat:@"if(uexDataBaseMgr.cbSelectSql){uexDataBaseMgr.cbSelectSql(%@,%@,%@)}",inOpId,@(UEX_CALLBACK_DATATYPE_JSON),[cbResult JSONFragment]];
-        
-        [EUtility brwView:self.meBrwView evaluateScript:jsStr];
-		//[self jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_JSON strData:cbResult];
-	}else {
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+
+
+
+
+
+
+- (void)executeSql:(NSMutableArray *)inArguments{
+    ACArgsUnpack(NSString *inDBName,NSNumber *inOpId,NSString *inSQL,ACJSFunctionRef *cb) = inArguments;
+
+
+    void (^callback)(NSNumber *result) = ^(NSNumber *result){
+        [self.webViewEngine callbackWithFunctionKeyPath:@"uexDataBaseMgr.cbExecuteSql" arguments:ACArgsPack(@(inOpId.integerValue),@2,result)];
+        [cb executeWithArguments:ACArgsPack(result)];
+    };
+    
+    
+	Database *db = [self.dbDict objectForKey:inDBName];
+	if(!db || !inSQL || inSQL.length == 0){
+        callback(UEX_FAILURE);
+        return;
 	}
 
+    dispatch_async(db.queue, ^{
+        if ([db execSQL:[inSQL UTF8String]]) {
+            callback(UEX_SUCCESS);
+        }else {
+            self.shouldRollback = YES;
+            callback(UEX_FAILURE);
+        }
+    });
+
+
+
 }
--(void)beginTransaction:(NSMutableArray*)inArguments{
-	NSString *inDBName = [inArguments objectAtIndex:0];
-	NSString *inOpId = [inArguments objectAtIndex:1];
-	Database *db = [DBDict objectForKey:inDBName];
-	if(!db){
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-		return;
+-(void)selectSql:(NSMutableArray *)inArguments{
+	ACArgsUnpack(NSString *inDBName,NSNumber *inOpId,NSString *inSQL,ACJSFunctionRef *cb) = inArguments;
+    void (^callback)(NSArray *result) = ^(NSArray *result){
+        if(result){
+            [self.webViewEngine callbackWithFunctionKeyPath:@"uexDataBaseMgr.cbSelectSql" arguments:ACArgsPack(@(inOpId.integerValue),@1,result.ac_JSONFragment)];
+        }else{
+            [self.webViewEngine callbackWithFunctionKeyPath:@"uexDataBaseMgr.cbSelectSql" arguments:ACArgsPack(@(inOpId.integerValue),@2,UEX_FAILURE)];
+        }
+        [cb executeWithArguments:ACArgsPack(result)];
+    };
+    
+    
+    
+	Database *db = [self.dbDict objectForKey:inDBName];
+	if(!db || !inSQL || inSQL.length == 0){
+        callback(nil);
+        return;
 	}
-	rollTarget = NO;
-	BOOL tranStatus = NO;
-	const char *tranSql = "BEGIN TRANSACTION";
-	tranStatus = [db execSQL:tranSql];
-	//if (tranStatus) {
-	//	[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
-	//}else {
-	//	[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-	//}
+
+    dispatch_async(db.queue, ^{
+        callback([db selectSQL:[inSQL UTF8String]]);
+    });
 }
--(void)endTransaction:(NSMutableArray *)arguments{
-	NSString *inDBName = [arguments objectAtIndex:0];
-	NSString *inOpId = [arguments objectAtIndex:1];
-	Database *db = [DBDict objectForKey:inDBName];
-	if(!db){
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-		return;
-	}
-	BOOL tranStatus = NO;
-	const char * tranSql = "";
-	if (rollTarget) {
-		tranSql = "ROLLBACK TRANSACTION";
-	}else {
-		tranSql = "COMMIT TRANSACTION";
-	}
-	tranStatus = [db execSQL:tranSql];
-	if (rollTarget) {
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-	}else {
-		if (tranStatus) {
-			[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
-		}else {
-			[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-		}
-	}
+
+
+- (void)transaction:(NSMutableArray *)inArguments{
+    ACArgsUnpack(NSString *inDBName,NSNumber *inOpId,ACJSFunctionRef *inFunc,ACJSFunctionRef *cb) = inArguments;
+    void (^callback)(NSNumber *result) = ^(NSNumber *result){
+        [self.webViewEngine callbackWithFunctionKeyPath:@"uexDataBaseMgr.cbTransaction" arguments:ACArgsPack(@(inOpId.integerValue),@2,result)];
+        [cb executeWithArguments:ACArgsPack(result)];
+    };
+    Database *db = [self.dbDict objectForKey:inDBName];
+    if (!db || !inFunc) {
+        callback(UEX_FAILURE);
+        return;
+    }
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        __block BOOL shouleContinue = YES;
+        //保证本次transaction结束前不会开始第二次transaction
+        dispatch_semaphore_wait(db.transactionLock, DISPATCH_TIME_FOREVER);
+
+        self.shouldRollback = NO;
+        dispatch_async(db.queue, ^{
+            if (![db execSQL:"BEGIN TRANSACTION"]) {
+                callback(UEX_FAILURE);
+                shouleContinue = NO;
+                dispatch_semaphore_signal(db.transactionLock);
+            };
+        });
+        dispatch_async(db.queue, ^{
+            if (shouleContinue) {
+                [inFunc executeWithArguments:nil completionHandler:^(JSValue * _Nullable returnValue) {
+                    
+                    //此回调执行时,inFunc中的消息可能还在主线程中待转发到插件实例,因此其中的sql操作并未全部加入db.queue中
+                    //所以从主线程进入dbqueue,保证inFunc中所有的sql操作均已加入db.queue后,再结束transaction
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        dispatch_async(db.queue, ^{
+                            if (!shouleContinue) {
+                                return;
+                            }
+                            if (self.shouldRollback) {
+                                [db execSQL:"ROLLBACK TRANSACTION"];
+                                callback(UEX_FAILURE);
+                            }else{
+                                if([db execSQL:"COMMIT TRANSACTION"]){
+                                    callback(UEX_SUCCESS);
+                                }else{
+                                    callback(UEX_FAILURE);
+                                }
+                            }
+                            dispatch_semaphore_signal(db.transactionLock);
+                        });
+                    });
+                }];
+            }
+        });
+    });
 }
--(void)closeDataBase:(NSMutableArray*)arguments{
-	NSString *inDBName = [arguments objectAtIndex:0];
-	NSString *inOpId = 0;
-	if ([arguments count]==2) {
-		inOpId = [arguments objectAtIndex:1];
-	}
-	Database *db = [DBDict objectForKey:inDBName];
+
+
+- (NSNumber *)closeDataBase:(NSMutableArray *)inArguments{
+    ACArgsUnpack(NSString *inDBName,NSNumber *inOpId) = inArguments;
+    __block NSNumber *cbResult = UEX_FAILURE;
+    @onExit{
+        [self.webViewEngine callbackWithFunctionKeyPath:@"uexDataBaseMgr.cbCloseDataBase" arguments:ACArgsPack(@(inOpId.integerValue),@2,cbResult)];
+    };
+    
+	Database *db = [self.dbDict objectForKey:inDBName];
 	if(!db){
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbCloseDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
-		return;
+		return cbResult;
 	}
-	BOOL closeStatus = NO;
-	closeStatus = [db closeDataBase];
-	if (closeStatus) {
-		[DBDict removeObjectForKey:inDBName];
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbCloseDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
-	}else {
-		[self jsSuccessWithName:@"uexDataBaseMgr.cbCloseDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
+    
+	if ([db closeDataBase]) {
+		[self.dbDict removeObjectForKey:inDBName];
+        cbResult = UEX_SUCCESS;
 	}
+    return cbResult;
 }
 
 @end
