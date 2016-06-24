@@ -246,6 +246,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EUExDataBaseMgr/EUExDataBaseMgr-Prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = uexDataBaseMgr;
 				SKIP_INSTALL = YES;
@@ -265,6 +266,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EUExDataBaseMgr/EUExDataBaseMgr-Prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = uexDataBaseMgr;
 				SKIP_INSTALL = YES;
