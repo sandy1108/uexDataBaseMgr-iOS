@@ -212,6 +212,7 @@ static inline NSNumber *randomOpId(){
     if (!db || ![db close]) {
         return @(NO);
     }
+    [self.dbDict removeObjectForKey:uexDBGetName(jsDB)];
     return @(YES);
 }
 
