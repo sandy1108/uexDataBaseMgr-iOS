@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		42A543711D4F1D0E00445350 /* uexDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 42A543701D4F1D0E00445350 /* uexDatabase.m */; };
 		42F20AAF1D18E1D700DA6EEA /* AppCanKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42F20AAE1D18E1D700DA6EEA /* AppCanKit.framework */; };
 		5A500ED7188FB0F50022E07C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A500ED6188FB0F50022E07C /* Foundation.framework */; };
 		5A500EDE188FB0F50022E07C /* EUExDataBaseMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A500EDD188FB0F50022E07C /* EUExDataBaseMgr.m */; };
-		5A500F0B188FB1590022E07C /* Database.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A500F02188FB1590022E07C /* Database.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,13 +26,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		42A5436F1D4F1D0E00445350 /* uexDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uexDatabase.h; sourceTree = "<group>"; };
+		42A543701D4F1D0E00445350 /* uexDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = uexDatabase.m; sourceTree = "<group>"; };
 		42F20AAE1D18E1D700DA6EEA /* AppCanKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AppCanKit.framework; sourceTree = "<group>"; };
 		5A500ED3188FB0F50022E07C /* libuexDataBaseMgr.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libuexDataBaseMgr.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A500ED6188FB0F50022E07C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		5A500EDA188FB0F50022E07C /* EUExDataBaseMgr-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "EUExDataBaseMgr-Prefix.pch"; sourceTree = "<group>"; };
 		5A500EDD188FB0F50022E07C /* EUExDataBaseMgr.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EUExDataBaseMgr.m; sourceTree = "<group>"; };
-		5A500F01188FB1590022E07C /* Database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Database.h; sourceTree = "<group>"; };
-		5A500F02188FB1590022E07C /* Database.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Database.m; sourceTree = "<group>"; };
 		5A60A96C18AB666300C727A6 /* EUExDataBaseMgr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EUExDataBaseMgr.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -97,8 +97,8 @@
 		5A500F00188FB1590022E07C /* sourceCode */ = {
 			isa = PBXGroup;
 			children = (
-				5A500F01188FB1590022E07C /* Database.h */,
-				5A500F02188FB1590022E07C /* Database.m */,
+				42A5436F1D4F1D0E00445350 /* uexDatabase.h */,
+				42A543701D4F1D0E00445350 /* uexDatabase.m */,
 			);
 			path = sourceCode;
 			sourceTree = "<group>";
@@ -154,7 +154,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5A500F0B188FB1590022E07C /* Database.m in Sources */,
+				42A543711D4F1D0E00445350 /* uexDatabase.m in Sources */,
 				5A500EDE188FB0F50022E07C /* EUExDataBaseMgr.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
