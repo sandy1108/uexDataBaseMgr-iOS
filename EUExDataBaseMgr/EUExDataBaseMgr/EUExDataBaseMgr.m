@@ -10,17 +10,20 @@
 #import "uexDatabase.h"
 #import <AppCanKit/ACEXTScope.h>
 
+
+
+
 #define UEX_RESULT NSNumber *
 #define UEX_DATABASE NSDictionary *
-#define UEX_ERROR NSDictionary *
+//#define UEX_ERROR NSDictionary *
 
-typedef NS_ENUM(NSInteger,uexDatabaseErrorCode){
-    uexDatabaseErrorNoError = 0,
-    uexDatabaseErrorInvalidParameters = -1,
-    uexDatabaseErrorExecutingSQLError = -2,
-    uexDatabaseErrorTransactionFailure = -3,
-    uexDatabaseErrorTransactionRollback = -4,
-};
+//typedef NS_ENUM(NSInteger,uexDatabaseErrorCode){
+//    uexDatabaseErrorNoError = 0,
+//    uexDatabaseErrorInvalidParameters = -1,
+//    uexDatabaseErrorExecutingSQLError = -2,
+//    uexDatabaseErrorTransactionFailure = -3,
+//    uexDatabaseErrorTransactionRollback = -4,
+//};
 
 static UEX_RESULT kSuccess;
 static UEX_RESULT kFailure;
@@ -31,24 +34,8 @@ __attribute__((constructor)) static void initUexConstant(){
     kSuccess = @0;
     kFailure = @1;
     kAlreadyOpened = @-1;
-    kErrorInfoDict = @{
-                       @(uexDatabaseErrorInvalidParameters): @"invalid parameters!",
-                       @(uexDatabaseErrorExecutingSQLError): @"invalid SQL command or db error!",
-                       @(uexDatabaseErrorTransactionFailure): @"failed to do transaction!",
-                       @(uexDatabaseErrorTransactionRollback): @"SQL error,transaction rollback!"
-                       };
 }
 
-
-static inline UEX_ERROR uexErrorMake(uexDatabaseErrorCode errCode){
-    if (errCode == uexDatabaseErrorNoError) {
-        return nil;
-    }
-    return @{
-             @"errStr": kErrorInfoDict[@(errCode)],
-             @"errCode": @(errCode)
-             };
-}
 
 static inline UEX_DATABASE uexDBMake(NSString * _Nonnull name,NSNumber * _Nonnull opId){
     return @{
@@ -60,11 +47,7 @@ static inline UEX_DATABASE uexDBMake(NSString * _Nonnull name,NSNumber * _Nonnul
 static inline NSString * uexDBGetName(UEX_DATABASE db){
     return db[@"name"];
 }
-/*
-static inline NSNumber * uexDBGetOpId(UEX_DATABASE db){
-    return db[@"id"];
-}
-*/
+
 static inline NSNumber *randomOpId(){
     return @(arc4random_uniform(INT_MAX));
 }
@@ -76,8 +59,6 @@ static inline NSNumber *randomOpId(){
 
 @interface EUExDataBaseMgr()
 @property (nonatomic,strong)NSMutableDictionary<NSString *,uexDatabase *> *dbDict;
-@property (nonatomic,assign)BOOL shouldRollback;
-
 
 @end
 
@@ -96,7 +77,7 @@ static inline NSNumber *randomOpId(){
     [self clean];
 }
 -(void)clean{
-    for (uexDatabase *db in [self.self.dbDict allValues]) {
+    for (uexDatabase *db in [self.dbDict allValues]) {
         [db close];
     }
     [self.dbDict removeAllObjects];
@@ -136,41 +117,45 @@ static inline NSNumber *randomOpId(){
 - (void)sql:(NSMutableArray *)inArguments{
     ACArgsUnpack(UEX_DATABASE jsDB,NSString *sql,ACJSFunctionRef *cb) = inArguments;
     
-    void (^callback)(uexDatabaseErrorCode errCode) = ^(uexDatabaseErrorCode errCode){
-        [cb executeWithArguments:ACArgsPack(uexErrorMake(errCode))];
+    
+    
+    __block UEX_ERROR err = kUexNoError;
+    void (^callback)() = ^(){
+        [cb executeWithArguments:ACArgsPack(err)];
     };
     uexDatabase *db = [self.dbDict objectForKey:uexDBGetName(jsDB)];
     if (!db || !sql || sql.length == 0) {
-        callback(uexDatabaseErrorInvalidParameters);
+        err = uexErrorMake(1,@"参数错误");
+        callback();
         return;
     }
     [db execSQL:sql completion:^(BOOL isSuccess) {
-        if (isSuccess) {
-            callback(uexDatabaseErrorNoError);
-        }else{
-            callback(uexDatabaseErrorExecutingSQLError);
+        if (!isSuccess) {
+            err = uexErrorMake(2,@"SQL Error");
         }
+        callback();
     }];
 }
 
 
 - (void)select:(NSMutableArray *)inArguments{
     ACArgsUnpack(UEX_DATABASE jsDB,NSString *sql,ACJSFunctionRef *cb) = inArguments;
-
-    void (^callback)(uexDatabaseErrorCode errCode,NSArray *data) = ^(uexDatabaseErrorCode errCode,NSArray *data){
-        [cb executeWithArguments:ACArgsPack(uexErrorMake(errCode),data)];
+    
+    __block UEX_ERROR err = kUexNoError;
+    void (^callback)(NSArray *data) = ^(NSArray *data){
+        [cb executeWithArguments:ACArgsPack(err,data)];
     };
     uexDatabase *db = [self.dbDict objectForKey:uexDBGetName(jsDB)];
     if (!db || !sql || sql.length == 0) {
-        callback(uexDatabaseErrorInvalidParameters,nil);
+        err = uexErrorMake(1,@"参数错误");
+        callback(nil);
         return;
     }
     [db selectSQL:sql completion:^(NSArray<NSDictionary *> *result) {
-        if (result) {
-            callback(uexDatabaseErrorNoError,result);
-        }else{
-            callback(uexDatabaseErrorExecutingSQLError,nil);
+        if (!result) {
+            err = uexErrorMake(2,@"SQL Error");
         }
+        callback(result);
     }];
     
 }
@@ -179,41 +164,44 @@ static inline NSNumber *randomOpId(){
 
 - (void)transactionEx:(NSMutableArray *)inArguments{
     ACArgsUnpack(UEX_DATABASE jsDB,ACJSFunctionRef *inFunc,ACJSFunctionRef *cb) = inArguments;
-    void (^callback)(uexDatabaseErrorCode errCode) = ^(uexDatabaseErrorCode errCode){
-        [cb executeWithArguments:ACArgsPack(uexErrorMake(errCode))];
+    __block UEX_ERROR err = kUexNoError;
+    void (^callback)() = ^(){
+        [cb executeWithArguments:ACArgsPack(err)];
     };
     uexDatabase *db = [self.dbDict objectForKey:uexDBGetName(jsDB)];
     if (!db || !inFunc) {
-        callback(uexDatabaseErrorInvalidParameters);
+        err = uexErrorMake(1,@"参数错误");
+        callback();
         return;
     }
     [db doTransaction:inFunc completion:^(uexDatabaseTransactionResult result) {
         switch (result) {
             case uexDatabaseTransactionSuccess: {
-                callback(uexDatabaseErrorNoError);
                 break;
             }
             case uexDatabaseTransactionRollback: {
-                callback(uexDatabaseErrorTransactionRollback);
+                err = uexErrorMake(2,@"SQL Error,transaction ROLLBACK");
                 break;
             }
             case uexDatabaseTransactionError: {
-                callback(uexDatabaseErrorTransactionFailure);
+                err = uexErrorMake(3,@"SQL Error,transaction FAILED");
                 break;
             }
+                
         }
+        callback();
     }];
     
 }
 
-- (NSNumber *)close:(NSMutableArray *)inArguments{
+- (UEX_BOOL)close:(NSMutableArray *)inArguments{
     ACArgsUnpack(UEX_DATABASE jsDB) = inArguments;
     uexDatabase *db = [self.dbDict objectForKey:uexDBGetName(jsDB)];
     if (!db || ![db close]) {
-        return @(NO);
+        return UEX_FALSE;
     }
     [self.dbDict removeObjectForKey:uexDBGetName(jsDB)];
-    return @(YES);
+    return UEX_TRUE;
 }
 
 
