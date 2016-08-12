@@ -38,7 +38,7 @@ typedef NS_ENUM(NSInteger,uexDatabaseTransactionResult){
 - (void)selectSQL:(NSString *)SQL completion:(void (^)(NSArray<NSDictionary *>* result))completion;
 
 
-
+- (void)doTransactionWithSQLs:(NSArray<NSString *> *)sqls completion:(void (^)(uexDatabaseTransactionResult result))completion;
 
 
 /**

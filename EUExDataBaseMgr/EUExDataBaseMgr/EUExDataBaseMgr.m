@@ -163,18 +163,20 @@ static inline NSNumber *randomOpId(){
 
 
 - (void)transactionEx:(NSMutableArray *)inArguments{
-    ACArgsUnpack(UEX_DATABASE jsDB,ACJSFunctionRef *inFunc,ACJSFunctionRef *cb) = inArguments;
+    ACArgsUnpack(UEX_DATABASE jsDB,NSArray *SQLs,ACJSFunctionRef *cb) = inArguments;
     __block UEX_ERROR err = kUexNoError;
     void (^callback)() = ^(){
         [cb executeWithArguments:ACArgsPack(err)];
     };
     uexDatabase *db = [self.dbDict objectForKey:uexDBGetName(jsDB)];
-    if (!db || !inFunc) {
+    
+    
+    if (!db || !SQLs) {
         err = uexErrorMake(1,@"参数错误");
         callback();
         return;
     }
-    [db doTransaction:inFunc completion:^(uexDatabaseTransactionResult result) {
+    [db doTransactionWithSQLs:SQLs completion:^(uexDatabaseTransactionResult result) {
         switch (result) {
             case uexDatabaseTransactionSuccess: {
                 break;
@@ -187,7 +189,6 @@ static inline NSNumber *randomOpId(){
                 err = uexErrorMake(3,@"SQL Error,transaction FAILED");
                 break;
             }
-                
         }
         callback();
     }];

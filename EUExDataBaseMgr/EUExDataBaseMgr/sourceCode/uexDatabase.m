@@ -155,6 +155,32 @@ static NSString *kDatabaseFolderPath = nil;
     UEX_DO_IN_SERIAL_QUEUE_END;
 }
 
+- (void)doTransactionWithSQLs:(NSArray<NSString *> *)SQLs completion:(void (^)(uexDatabaseTransactionResult))completion{
+    UEX_DO_IN_SERIAL_QUEUE_BEGIN;
+    __block uexDatabaseTransactionResult result = uexDatabaseTransactionError;
+    @onExit{
+        completion(result);
+    };
+    if (sqlite3_exec(_dbHandle, "BEGIN TRANSACTION", NULL, NULL, NULL) != SQLITE_OK) {
+        return;
+    }
+    for (NSString *sql in SQLs) {
+        char *errMsg = nil;
+        int ret = sqlite3_exec(_dbHandle, sql.UTF8String, NULL, NULL, &errMsg);
+        if (ret != SQLITE_OK) {
+            result = uexDatabaseTransactionRollback;
+            sqlite3_exec(_dbHandle, "ROLLBACK TRANSACTION", NULL, NULL, NULL);
+            ACLogDebug(@"transaction exec '%@' error: %s",sql,errMsg);
+            return;
+        }
+    }
+    if (sqlite3_exec(_dbHandle, "COMMIT TRANSACTION", NULL, NULL, NULL) != SQLITE_OK) {
+        return;
+    }
+    result = uexDatabaseTransactionSuccess;
+    UEX_DO_IN_SERIAL_QUEUE_END;
+}
+
 
 - (void)doTransaction:(ACJSFunctionRef *)jsFunc completion:(void (^)(uexDatabaseTransactionResult))completion{
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
