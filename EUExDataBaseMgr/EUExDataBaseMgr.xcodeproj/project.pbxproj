@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		42A543711D4F1D0E00445350 /* uexDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 42A543701D4F1D0E00445350 /* uexDatabase.m */; };
+		42F20AAF1D18E1D700DA6EEA /* AppCanKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42F20AAE1D18E1D700DA6EEA /* AppCanKit.framework */; };
 		5A500ED7188FB0F50022E07C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A500ED6188FB0F50022E07C /* Foundation.framework */; };
 		5A500EDE188FB0F50022E07C /* EUExDataBaseMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A500EDD188FB0F50022E07C /* EUExDataBaseMgr.m */; };
-		5A500F0B188FB1590022E07C /* Database.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A500F02188FB1590022E07C /* Database.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,24 +26,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		42A5436F1D4F1D0E00445350 /* uexDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uexDatabase.h; sourceTree = "<group>"; };
+		42A543701D4F1D0E00445350 /* uexDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = uexDatabase.m; sourceTree = "<group>"; };
+		42F20AAE1D18E1D700DA6EEA /* AppCanKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AppCanKit.framework; sourceTree = "<group>"; };
 		5A500ED3188FB0F50022E07C /* libuexDataBaseMgr.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libuexDataBaseMgr.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A500ED6188FB0F50022E07C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		5A500EDA188FB0F50022E07C /* EUExDataBaseMgr-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "EUExDataBaseMgr-Prefix.pch"; sourceTree = "<group>"; };
 		5A500EDD188FB0F50022E07C /* EUExDataBaseMgr.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EUExDataBaseMgr.m; sourceTree = "<group>"; };
-		5A500EFD188FB1590022E07C /* EUExBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EUExBase.h; sourceTree = "<group>"; };
-		5A500EFE188FB1590022E07C /* EUExBaseDefine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EUExBaseDefine.h; sourceTree = "<group>"; };
-		5A500EFF188FB1590022E07C /* EUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EUtility.h; sourceTree = "<group>"; };
-		5A500F01188FB1590022E07C /* Database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Database.h; sourceTree = "<group>"; };
-		5A500F02188FB1590022E07C /* Database.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Database.m; sourceTree = "<group>"; };
-		5A500F04188FB1590022E07C /* JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSON.h; sourceTree = "<group>"; };
-		5A500F05188FB1590022E07C /* NSObject+SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+SBJSON.h"; sourceTree = "<group>"; };
-		5A500F06188FB1590022E07C /* NSString+SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+SBJSON.h"; sourceTree = "<group>"; };
-		5A500F07188FB1590022E07C /* SBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJSON.h; sourceTree = "<group>"; };
-		5A500F08188FB1590022E07C /* SBJsonBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonBase.h; sourceTree = "<group>"; };
-		5A500F09188FB1590022E07C /* SBJsonParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonParser.h; sourceTree = "<group>"; };
-		5A500F0A188FB1590022E07C /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonWriter.h; sourceTree = "<group>"; };
 		5A60A96C18AB666300C727A6 /* EUExDataBaseMgr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EUExDataBaseMgr.h; sourceTree = "<group>"; };
-		F7CED0D91A82FDC600A22406 /* BUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BUtility.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				42F20AAF1D18E1D700DA6EEA /* AppCanKit.framework in Frameworks */,
 				5A500ED7188FB0F50022E07C /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -85,9 +77,9 @@
 		5A500ED8188FB0F50022E07C /* EUExDataBaseMgr */ = {
 			isa = PBXGroup;
 			children = (
+				42F20AAE1D18E1D700DA6EEA /* AppCanKit.framework */,
 				5A60A96C18AB666300C727A6 /* EUExDataBaseMgr.h */,
 				5A500EDD188FB0F50022E07C /* EUExDataBaseMgr.m */,
-				5A500EFC188FB1590022E07C /* engineHeader */,
 				5A500F00188FB1590022E07C /* sourceCode */,
 				5A500ED9188FB0F50022E07C /* Supporting Files */,
 			);
@@ -102,39 +94,13 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		5A500EFC188FB1590022E07C /* engineHeader */ = {
-			isa = PBXGroup;
-			children = (
-				F7CED0D91A82FDC600A22406 /* BUtility.h */,
-				5A500EFD188FB1590022E07C /* EUExBase.h */,
-				5A500EFE188FB1590022E07C /* EUExBaseDefine.h */,
-				5A500EFF188FB1590022E07C /* EUtility.h */,
-			);
-			path = engineHeader;
-			sourceTree = "<group>";
-		};
 		5A500F00188FB1590022E07C /* sourceCode */ = {
 			isa = PBXGroup;
 			children = (
-				5A500F01188FB1590022E07C /* Database.h */,
-				5A500F02188FB1590022E07C /* Database.m */,
-				5A500F03188FB1590022E07C /* JSON */,
+				42A5436F1D4F1D0E00445350 /* uexDatabase.h */,
+				42A543701D4F1D0E00445350 /* uexDatabase.m */,
 			);
 			path = sourceCode;
-			sourceTree = "<group>";
-		};
-		5A500F03188FB1590022E07C /* JSON */ = {
-			isa = PBXGroup;
-			children = (
-				5A500F04188FB1590022E07C /* JSON.h */,
-				5A500F05188FB1590022E07C /* NSObject+SBJSON.h */,
-				5A500F06188FB1590022E07C /* NSString+SBJSON.h */,
-				5A500F07188FB1590022E07C /* SBJSON.h */,
-				5A500F08188FB1590022E07C /* SBJsonBase.h */,
-				5A500F09188FB1590022E07C /* SBJsonParser.h */,
-				5A500F0A188FB1590022E07C /* SBJsonWriter.h */,
-			);
-			path = JSON;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -188,7 +154,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5A500F0B188FB1590022E07C /* Database.m in Sources */,
+				42A543711D4F1D0E00445350 /* uexDatabase.m in Sources */,
 				5A500EDE188FB0F50022E07C /* EUExDataBaseMgr.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -271,10 +237,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				CONFIGURATION_BUILD_DIR = "$(SRCROOT)/uexDataBaseMgr/";
 				DSTROOT = /tmp/EUExDataBaseMgr.dst;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/EUExDataBaseMgr",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EUExDataBaseMgr/EUExDataBaseMgr-Prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = uexDataBaseMgr;
 				SKIP_INSTALL = YES;
@@ -285,10 +257,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				CONFIGURATION_BUILD_DIR = "$(SRCROOT)/uexDataBaseMgr/";
 				DSTROOT = /tmp/EUExDataBaseMgr.dst;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/EUExDataBaseMgr",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EUExDataBaseMgr/EUExDataBaseMgr-Prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = uexDataBaseMgr;
 				SKIP_INSTALL = YES;

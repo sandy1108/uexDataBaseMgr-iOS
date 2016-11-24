@@ -6,12 +6,9 @@
 //  Copyright 2012 AppCan. All rights reserved.
 //
 
-#import "EUExBase.h"
 
-BOOL rollTarget;
 
-@interface EUExDataBaseMgr : EUExBase {
-	NSMutableDictionary * methodDict;
-	NSMutableDictionary * DBDict;
-}
+
+
+@interface EUExDataBaseMgr : EUExBase
 @end
