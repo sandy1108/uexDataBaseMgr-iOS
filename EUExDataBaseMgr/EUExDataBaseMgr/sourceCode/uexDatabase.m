@@ -43,6 +43,8 @@
 static NSString *kDatabaseFolderPath = nil;
 
 
+
+
 + (void)initialize{
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -55,6 +57,11 @@ static NSString *kDatabaseFolderPath = nil;
         }
         kDatabaseFolderPath = dbFolderPath;
     });
+}
+
+
++ (NSString *)dbFolderPath{
+    return kDatabaseFolderPath;
 }
 
 - (BOOL)open:(NSString *)dbName{

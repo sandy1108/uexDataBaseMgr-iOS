@@ -31,7 +31,7 @@ typedef NS_ENUM(NSInteger,uexDatabaseTransactionResult){
 };
 
 @interface uexDatabase: NSObject
-
+@property(nonatomic,retain,class) NSString *dbFolderPath;
 - (BOOL)open:(NSString *)dbName;
 - (BOOL)close;
 - (void)execSQL:(NSString *)SQL completion:(void (^)(BOOL isSuccess))completion;

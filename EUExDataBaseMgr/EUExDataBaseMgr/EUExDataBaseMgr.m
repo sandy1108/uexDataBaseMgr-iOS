@@ -206,6 +206,41 @@ static inline NSNumber *randomOpId(){
 }
 
 
+- (void)copyDataBaseFile:(NSMutableArray *)inArguments{
+    ACArgsUnpack(NSString *inPath,ACJSFunctionRef *callback) = inArguments;
+    NSString *dbPath = [self absPath:inPath];
+    UEX_PARAM_GUARD_NOT_NIL(dbPath);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        __block UEX_ERROR err = kUexNoError;
+        @onExit{
+            [callback executeWithArguments:ACArgsPack(err)];
+        };
+        
+        
+        NSFileManager *fm = [NSFileManager defaultManager];
+        if (![fm fileExistsAtPath:dbPath]) {
+            err = uexErrorMake(1,@"dbFile not exist!");
+            return;
+        }
+        NSString *dbFileName = [dbPath lastPathComponent];
+        NSString *destination = [[uexDatabase dbFolderPath] stringByAppendingPathComponent:dbFileName];
+        NSError *e = nil;
+        if ([fm fileExistsAtPath:destination]) {
+            [fm removeItemAtPath:destination error:&e];
+        }
+        if (e) {
+            err = uexErrorMake(2,e.localizedDescription);
+            return;
+        }
+        
+        if (![fm copyItemAtPath:dbPath toPath:destination error:&e]) {
+            err = uexErrorMake(3,e.localizedDescription);
+        }
+        
+        
+    });
+}
+
 #pragma mark - 3.0 API
 
 - (UEX_RESULT)openDataBase:(NSMutableArray *)inArguments{

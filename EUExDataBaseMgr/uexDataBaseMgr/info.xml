@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
     <plugin
-        uexName="uexDataBaseMgr" version="4.0.0" build="0">
-        <info>0:数据库功能插件</info>
+        uexName="uexDataBaseMgr" version="4.0.1" build="1">
+        <info>1:支持拷贝预置数据库</info>
+        <build>0:数据库功能插件</build>
     </plugin>
 </uexplugins>
 

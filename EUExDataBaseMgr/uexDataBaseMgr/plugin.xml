@@ -13,5 +13,6 @@
         <method name="select"></method>
         <method name="transactionEx"></method>
         <method name="close"></method>
+        <method name="copyDataBaseFile"></method>
     </plugin>
 </uexplugins>
