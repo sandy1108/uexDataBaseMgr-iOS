@@ -86,6 +86,14 @@ static NSString *kDatabaseFolderPath = nil;
 }
 
 - (void)execSQL:(NSString *)SQL completion:(void (^)(BOOL))completion{
+    if(!_dbHandle){
+        if (completion) {
+            completion(NO);
+        }
+        return;
+    }
+    
+    
     UEX_DO_IN_SERIAL_QUEUE_BEGIN;
     char *errMsg = nil;
     int status = sqlite3_exec(_dbHandle, SQL.UTF8String, NULL, NULL, &errMsg);
