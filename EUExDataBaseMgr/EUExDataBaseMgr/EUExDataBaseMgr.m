@@ -12,7 +12,67 @@
 #import "EUExBaseDefine.h"
 #import "BUtility.h"
 #import "JSON.h"
+
+@interface Singleton : NSObject
++(instancetype) shareInstance ;
+@property (nonatomic,retain) NSMutableDictionary *queueDic;
+@end
+
+
+@implementation Singleton
+
+static Singleton* _instance = nil;
+
++(instancetype) shareInstance
+{
+    static dispatch_once_t onceToken ;
+    dispatch_once(&onceToken, ^{
+        _instance = [[super allocWithZone:NULL] init] ;
+        _instance.queueDic = [[NSMutableDictionary alloc] init];
+        
+    }) ;
+    
+    return _instance ;
+}
+
++(id) allocWithZone:(struct _NSZone *)zone
+{
+    return [Singleton shareInstance] ;
+}
+
+-(id) copyWithZone:(struct _NSZone *)zone
+{
+    return [Singleton shareInstance] ;
+}
+
+- (dispatch_queue_t)getQueue:(NSString *)name
+{
+    dispatch_queue_t q;
+    
+    if ((q = [_queueDic objectForKey:name])) {
+        return q;
+    }
+    else
+    {
+        q = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_SERIAL);
+        [_queueDic setObject:q forKey:name];
+    }
+    
+    return q;
+}
+
+@end
+
+@interface EUExDataBaseMgr()
+@property (nonatomic, strong) dispatch_queue_t queue;
+@end
+
+
 @implementation EUExDataBaseMgr
+#define UEX_DO_IN_SERIAL_QUEUE_BEGIN    dispatch_async(_queue, ^{
+
+#define UEX_DO_IN_SERIAL_QUEUE_END      });
+
 -(void)dealloc{
 	if (DBDict) {
 		for (Database *db in [DBDict allValues]) {
@@ -48,6 +108,9 @@
 	if([arguments count]==2){
 		inOpId = [arguments objectAtIndex:1];
 	}
+    NSString *label = [@"uexDataBaseMgr.cbOpenDataBase." stringByAppendingString:inDBName];
+    _queue = [[Singleton shareInstance] getQueue:label];
+
 	Database *db = [DBDict objectForKey:inDBName];
 	if (db) {
 		[self jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];
@@ -66,9 +129,15 @@
 	}
 }
 -(void)executeSql:(NSMutableArray *)arguments{
+    
 	NSString *inDBName = [arguments objectAtIndex:0];
 	NSString *inOpId = [arguments objectAtIndex:1];
 	NSString *inSQL = [arguments objectAtIndex:2];
+    
+    NSString *label = [@"uexDataBaseMgr.cbOpenDataBase." stringByAppendingString:inDBName];
+    _queue = [[Singleton shareInstance] getQueue:label];
+    UEX_DO_IN_SERIAL_QUEUE_BEGIN;
+    
 	Database *db = [DBDict objectForKey:inDBName];
 	if(!db){
 		[self jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
@@ -88,11 +157,17 @@
 		rollTarget = YES;
 		[self jsSuccessWithName:@"uexDataBaseMgr.cbExecuteSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 	}
+    UEX_DO_IN_SERIAL_QUEUE_END;
 }
 -(void)selectSql:(NSMutableArray *)arguments{
 	NSString *inDBName = [arguments objectAtIndex:0];
 	NSString *inOpId = [arguments objectAtIndex:1];
 	NSString *inSQL = [arguments objectAtIndex:2];
+    
+    NSString *label = [@"uexDataBaseMgr.cbOpenDataBase." stringByAppendingString:inDBName];
+    _queue = [[Singleton shareInstance] getQueue:label];
+    UEX_DO_IN_SERIAL_QUEUE_BEGIN;
+    
 	Database *db = [DBDict objectForKey:inDBName];
 	if(!db){
 		[self jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
@@ -113,11 +188,16 @@
 	}else {
 		[self jsSuccessWithName:@"uexDataBaseMgr.cbSelectSql" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 	}
-
+    UEX_DO_IN_SERIAL_QUEUE_END;
 }
 -(void)beginTransaction:(NSMutableArray*)inArguments{
 	NSString *inDBName = [inArguments objectAtIndex:0];
 	NSString *inOpId = [inArguments objectAtIndex:1];
+    
+    NSString *label = [@"uexDataBaseMgr.cbOpenDataBase." stringByAppendingString:inDBName];
+    _queue = [[Singleton shareInstance] getQueue:label];
+    UEX_DO_IN_SERIAL_QUEUE_BEGIN;
+    
 	Database *db = [DBDict objectForKey:inDBName];
 	if(!db){
 		[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
@@ -132,10 +212,17 @@
 	//}else {
 	//	[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 	//}
+    UEX_DO_IN_SERIAL_QUEUE_END;
 }
 -(void)endTransaction:(NSMutableArray *)arguments{
+    
 	NSString *inDBName = [arguments objectAtIndex:0];
 	NSString *inOpId = [arguments objectAtIndex:1];
+    
+    NSString *label = [@"uexDataBaseMgr.cbOpenDataBase." stringByAppendingString:inDBName];
+    _queue = [[Singleton shareInstance] getQueue:label];
+    UEX_DO_IN_SERIAL_QUEUE_BEGIN;
+    
 	Database *db = [DBDict objectForKey:inDBName];
 	if(!db){
 		[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
@@ -158,6 +245,7 @@
 			[self jsSuccessWithName:@"uexDataBaseMgr.cbTransaction" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CFAILED];
 		}
 	}
+    UEX_DO_IN_SERIAL_QUEUE_END;
 }
 -(void)closeDataBase:(NSMutableArray*)arguments{
 	NSString *inDBName = [arguments objectAtIndex:0];
