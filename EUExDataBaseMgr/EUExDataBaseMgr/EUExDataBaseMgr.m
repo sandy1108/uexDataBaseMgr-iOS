@@ -13,15 +13,15 @@
 #import "BUtility.h"
 #import "JSON.h"
 
-@interface Singleton : NSObject
+@interface DataBaseSingleton : NSObject
 +(instancetype) shareInstance ;
 @property (nonatomic,retain) NSMutableDictionary *queueDic;
 @end
 
 
-@implementation Singleton
+@implementation DataBaseSingleton
 
-static Singleton* _instance = nil;
+static DataBaseSingleton* _instance = nil;
 
 +(instancetype) shareInstance
 {
@@ -37,12 +37,12 @@ static Singleton* _instance = nil;
 
 +(id) allocWithZone:(struct _NSZone *)zone
 {
-    return [Singleton shareInstance] ;
+    return [DataBaseSingleton shareInstance] ;
 }
 
 -(id) copyWithZone:(struct _NSZone *)zone
 {
-    return [Singleton shareInstance] ;
+    return [DataBaseSingleton shareInstance] ;
 }
 
 - (dispatch_queue_t)getQueue:(NSString *)name
@@ -109,7 +109,7 @@ static Singleton* _instance = nil;
 		inOpId = [arguments objectAtIndex:1];
 	}
     NSString *label = [@"uexDataBaseMgr.cbOpenDataBase." stringByAppendingString:inDBName];
-    _queue = [[Singleton shareInstance] getQueue:label];
+    _queue = [[DataBaseSingleton shareInstance] getQueue:label];
 
 	Database *db = [DBDict objectForKey:inDBName];
 	if (db) {
@@ -135,7 +135,7 @@ static Singleton* _instance = nil;
 	NSString *inSQL = [arguments objectAtIndex:2];
     
     NSString *label = [@"uexDataBaseMgr.cbOpenDataBase." stringByAppendingString:inDBName];
-    _queue = [[Singleton shareInstance] getQueue:label];
+    _queue = [[DataBaseSingleton shareInstance] getQueue:label];
     UEX_DO_IN_SERIAL_QUEUE_BEGIN;
     
 	Database *db = [DBDict objectForKey:inDBName];
@@ -165,7 +165,7 @@ static Singleton* _instance = nil;
 	NSString *inSQL = [arguments objectAtIndex:2];
     
     NSString *label = [@"uexDataBaseMgr.cbOpenDataBase." stringByAppendingString:inDBName];
-    _queue = [[Singleton shareInstance] getQueue:label];
+    _queue = [[DataBaseSingleton shareInstance] getQueue:label];
     UEX_DO_IN_SERIAL_QUEUE_BEGIN;
     
 	Database *db = [DBDict objectForKey:inDBName];
@@ -195,7 +195,7 @@ static Singleton* _instance = nil;
 	NSString *inOpId = [inArguments objectAtIndex:1];
     
     NSString *label = [@"uexDataBaseMgr.cbOpenDataBase." stringByAppendingString:inDBName];
-    _queue = [[Singleton shareInstance] getQueue:label];
+    _queue = [[DataBaseSingleton shareInstance] getQueue:label];
     UEX_DO_IN_SERIAL_QUEUE_BEGIN;
     
 	Database *db = [DBDict objectForKey:inDBName];
@@ -220,7 +220,7 @@ static Singleton* _instance = nil;
 	NSString *inOpId = [arguments objectAtIndex:1];
     
     NSString *label = [@"uexDataBaseMgr.cbOpenDataBase." stringByAppendingString:inDBName];
-    _queue = [[Singleton shareInstance] getQueue:label];
+    _queue = [[DataBaseSingleton shareInstance] getQueue:label];
     UEX_DO_IN_SERIAL_QUEUE_BEGIN;
     
 	Database *db = [DBDict objectForKey:inDBName];
