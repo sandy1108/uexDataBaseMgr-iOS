@@ -7,11 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <sqlite3.h>
+#import "sqlite3.h"
+
+#define USE_SQLCipher //是否使用SQLCipher宏开关
+
 @interface Database : NSObject {
 	sqlite3 *dbHandle;
 }
--(BOOL)openDataBase:(NSString*)inDBName;
+-(BOOL)openDataBase:(NSString*)inDBName withEncryptKey:(NSString *)encryptkey;
 -(BOOL)closeDataBase;
 -(BOOL)execSQL:(const char*)inSQL;
 -(NSString*)selectSQL:(const char*)inSQL;

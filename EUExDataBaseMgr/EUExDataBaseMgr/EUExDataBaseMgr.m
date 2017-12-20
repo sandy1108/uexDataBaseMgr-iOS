@@ -119,8 +119,13 @@ static DataBaseSingleton* _instance = nil;
 		//[DBDict setObject:db forKey:inOpId];
 	}
 	db = [[Database alloc] init];
+    NSString *encryptKey = @"";
+    if ([arguments count] > 2) {
+        //此处新增参数用于处理加密数据库所用的key
+        encryptKey = [arguments objectAtIndex:2];
+    }
 	BOOL openStatus = NO;
-    openStatus = [db openDataBase:inDBName];
+    openStatus = [db openDataBase:inDBName withEncryptKey:encryptKey];
 	if (openStatus) {
         [DBDict setObject:db forKey:inDBName];
 		[self jsSuccessWithName:@"uexDataBaseMgr.cbOpenDataBase" opId:[inOpId intValue] dataType:UEX_CALLBACK_DATATYPE_INT intData:UEX_CSUCCESS];

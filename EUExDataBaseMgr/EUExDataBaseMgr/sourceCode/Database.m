@@ -10,7 +10,7 @@
 #import "EUtility.h"
 #import "JSON.h"
 @implementation Database
--(BOOL)openDataBase:(NSString*)inDBName{
+-(BOOL)openDataBase:(NSString*)inDBName withEncryptKey:(NSString *)encryptkey{
     //获取documents路径
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString * appCanDocumentPath =[[NSString alloc] initWithString:[paths objectAtIndex:0]] ;
@@ -32,7 +32,12 @@
 	int openDataStatus = sqlite3_open([dbPath UTF8String], &dbHandle);
 	//NSLog(@"openDataBase openDataStatus =%d",openDataStatus);
 	if (openDataStatus==SQLITE_OK) {
-		return YES;
+        BOOL ret = YES;
+#ifdef USE_SQLCipher
+        ret = [self setKey:encryptkey];
+        NSLog(@"openDataBase openDataStatus==SQLITE_OK, encrypt: %d", ret);
+#endif
+		return ret;
 	}else {
 		sqlite3_close(dbHandle);
 	}
@@ -44,6 +49,29 @@
 		return YES;
 	}
 	return NO;
+}
+
+- (BOOL)setKey:(NSString*)key {
+    NSData *keyData = [NSData dataWithBytes:[key UTF8String] length:(NSUInteger)strlen([key UTF8String])];
+    
+    return [self setKeyWithData:keyData];
+}
+
+- (BOOL)setKeyWithData:(NSData *)keyData {
+#ifdef SQLITE_HAS_CODEC
+    if (!keyData) {
+        return NO;
+    }
+    
+    int rc = sqlite3_key(dbHandle, [keyData bytes], (int)[keyData length]);
+    BOOL ret = (rc == SQLITE_OK);
+    if (!ret) {
+        NSLog(@"setKeyWithData--->status: %d", rc);
+    }
+    return ret;
+#else
+    return NO;
+#endif
 }
 
 -(BOOL)execSQL:(const char*)inSQL{

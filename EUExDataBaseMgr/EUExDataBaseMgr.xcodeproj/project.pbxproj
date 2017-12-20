@@ -10,6 +10,7 @@
 		5A500ED7188FB0F50022E07C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A500ED6188FB0F50022E07C /* Foundation.framework */; };
 		5A500EDE188FB0F50022E07C /* EUExDataBaseMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A500EDD188FB0F50022E07C /* EUExDataBaseMgr.m */; };
 		5A500F0B188FB1590022E07C /* Database.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A500F02188FB1590022E07C /* Database.m */; };
+		E8087AE81FEA8C67009233A4 /* libsqlcipher.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E842F3B01FEA56B000DEDD28 /* libsqlcipher.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -42,6 +43,8 @@
 		5A500F09188FB1590022E07C /* SBJsonParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonParser.h; sourceTree = "<group>"; };
 		5A500F0A188FB1590022E07C /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonWriter.h; sourceTree = "<group>"; };
 		5A60A96C18AB666300C727A6 /* EUExDataBaseMgr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EUExDataBaseMgr.h; sourceTree = "<group>"; };
+		E842F3B01FEA56B000DEDD28 /* libsqlcipher.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libsqlcipher.a; sourceTree = "<group>"; };
+		E842F3B11FEA56B000DEDD28 /* sqlite3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sqlite3.h; sourceTree = "<group>"; };
 		F7CED0D91A82FDC600A22406 /* BUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BUtility.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -51,6 +54,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5A500ED7188FB0F50022E07C /* Foundation.framework in Frameworks */,
+				E8087AE81FEA8C67009233A4 /* libsqlcipher.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,6 +120,7 @@
 		5A500F00188FB1590022E07C /* sourceCode */ = {
 			isa = PBXGroup;
 			children = (
+				E842F3AF1FEA56B000DEDD28 /* SQLCipher */,
 				5A500F01188FB1590022E07C /* Database.h */,
 				5A500F02188FB1590022E07C /* Database.m */,
 				5A500F03188FB1590022E07C /* JSON */,
@@ -135,6 +140,15 @@
 				5A500F0A188FB1590022E07C /* SBJsonWriter.h */,
 			);
 			path = JSON;
+			sourceTree = "<group>";
+		};
+		E842F3AF1FEA56B000DEDD28 /* SQLCipher */ = {
+			isa = PBXGroup;
+			children = (
+				E842F3B01FEA56B000DEDD28 /* libsqlcipher.a */,
+				E842F3B11FEA56B000DEDD28 /* sqlite3.h */,
+			);
+			path = SQLCipher;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -275,6 +289,12 @@
 				DSTROOT = /tmp/EUExDataBaseMgr.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EUExDataBaseMgr/EUExDataBaseMgr-Prefix.pch";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/EUExDataBaseMgr/sourceCode/SQLCipher\"";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/EUExDataBaseMgr/sourceCode/SQLCipher",
+				);
+				OTHER_CFLAGS = "-DSQLITE_HAS_CODEC";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = uexDataBaseMgr;
 				SKIP_INSTALL = YES;
@@ -289,6 +309,12 @@
 				DSTROOT = /tmp/EUExDataBaseMgr.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EUExDataBaseMgr/EUExDataBaseMgr-Prefix.pch";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/EUExDataBaseMgr/sourceCode/SQLCipher\"";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/EUExDataBaseMgr/sourceCode/SQLCipher",
+				);
+				OTHER_CFLAGS = "-DSQLITE_HAS_CODEC";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = uexDataBaseMgr;
 				SKIP_INSTALL = YES;
