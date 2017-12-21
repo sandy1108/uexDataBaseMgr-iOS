@@ -34,8 +34,10 @@
 	if (openDataStatus==SQLITE_OK) {
         BOOL ret = YES;
 #ifdef USE_SQLCipher
-        ret = [self setKey:encryptkey];
-        NSLog(@"openDataBase openDataStatus==SQLITE_OK, encrypt: %d", ret);
+        if ([encryptkey isKindOfClass:[NSString class]] && encryptkey.length > 0) {
+            ret = [self setKey:encryptkey];
+            NSLog(@"openDataBase openDataStatus==SQLITE_OK, encrypt: %d", ret);
+        }
 #endif
 		return ret;
 	}else {
